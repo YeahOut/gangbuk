@@ -328,8 +328,11 @@ export default function MyPage() {
                       <div className="flex items-center gap-2 mb-1">
                         <span className="text-xs text-gray-500 font-medium">{log.number}</span>
                       </div>
-                      <div className="text-sm font-medium text-gray-900 leading-tight">
+                      <div className="text-sm font-medium text-gray-900 leading-tight mb-0.5">
                         {log.mission.title}
+                      </div>
+                      <div className="text-xs text-gray-500 truncate">
+                        {log.mission.description}
                       </div>
                     </div>
                     

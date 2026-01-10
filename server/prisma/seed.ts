@@ -64,7 +64,7 @@ const missions = [
     icon: 'Church'
   },
   
-  // 기도 카테고리 (3개)
+  // 기도 카테고리 (7개)
   {
     title: '수양회 관련 기도부탁 올리기',
     description: '수양회 관련 기도부탁을 올려주세요',
@@ -80,11 +80,39 @@ const missions = [
     icon: 'Sunrise'
   },
   {
-    title: '각종 중보기도 및 전도 기도',
-    description: '기도부탁 명단, 전도하시는 형제/자매님, 교제에서 멀어진 형제/자매님, 전도인, 자신의 입술과 전도의 문이 열리길 기도 (통합)',
+    title: '기도부탁 명단을 위한 기도',
+    description: '기도부탁 명단을 위한 기도하세요',
     points: 2,
     category: '기도',
     icon: 'Heart'
+  },
+  {
+    title: '전도하시는 형제, 자매님을 위한 기도',
+    description: '전도하시는 형제, 자매님을 위한 기도하세요',
+    points: 2,
+    category: '기도',
+    icon: 'Users'
+  },
+  {
+    title: '교제에서 멀어진 형제, 자매님들 수양회 참석을 위한 기도',
+    description: '교제에서 멀어진 형제, 자매님들 수양회 참석을 위한 기도하세요',
+    points: 2,
+    category: '기도',
+    icon: 'HeartHandshake'
+  },
+  {
+    title: '말씀 전하시는 전도인을 위한 기도',
+    description: '말씀 전하시는 전도인을 위한 기도하세요',
+    points: 2,
+    category: '기도',
+    icon: 'Mic'
+  },
+  {
+    title: '자신의 입술과 전도의 문이 열리길 기도',
+    description: '자신의 입술과 전도의 문이 열리길 기도하세요',
+    points: 2,
+    category: '기도',
+    icon: 'HeartHandshake'
   },
   
   // 교제 카테고리 (7개)

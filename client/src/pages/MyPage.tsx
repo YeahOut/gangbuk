@@ -168,57 +168,60 @@ export default function MyPage() {
   return (
     <div>
       {/* 헤더: 제목과 부서 */}
-      <div className="mb-6 flex justify-between items-center">
-        <div className="flex items-center space-x-3">
-          <Target className="h-8 w-8 text-blue-600" />
-          <h1 className="text-3xl font-bold text-gray-900">전도챌린지</h1>
+      <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+        <div className="flex items-center space-x-2 sm:space-x-3">
+          <Target className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600" />
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">전도챌린지</h1>
         </div>
         <div className="flex items-center space-x-2">
-          <span className="text-sm text-gray-600">부서:</span>
-          <span className="px-4 py-2 bg-yellow-100 text-yellow-800 rounded-lg font-medium">
+          <span className="text-xs sm:text-sm text-gray-600">부서:</span>
+          <span className="px-3 sm:px-4 py-1.5 sm:py-2 bg-yellow-100 text-yellow-800 rounded-lg text-sm sm:text-base font-medium">
             {data.user.department}
           </span>
         </div>
       </div>
 
       {/* 순위 요약 */}
-      <div className="mb-8 bg-white rounded-xl shadow-md p-6">
-        <div className="flex flex-wrap items-center gap-4">
-          <div className="text-lg font-semibold text-gray-900">
+      <div className="mb-6 sm:mb-8 bg-white rounded-xl shadow-md p-4 sm:p-6">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-sm sm:text-base lg:text-lg">
+          <div className="font-semibold text-gray-900">
             TOTAL {getCategoryRankText(data.ranks.total)}
           </div>
-          <div className="text-gray-400">|</div>
-          <div className="text-lg font-semibold text-green-700">
+          <div className="text-gray-400 hidden sm:inline">|</div>
+          <div className="font-semibold text-green-700">
             말씀 {getCategoryRankText(data.ranks.말씀)}
           </div>
-          <div className="text-gray-400">|</div>
-          <div className="text-lg font-semibold text-purple-700">
+          <div className="text-gray-400 hidden sm:inline">|</div>
+          <div className="font-semibold text-purple-700">
             기도 {getCategoryRankText(data.ranks.기도)}
           </div>
-          <div className="text-gray-400">|</div>
-          <div className="text-lg font-semibold text-blue-700">
+          <div className="text-gray-400 hidden sm:inline">|</div>
+          <div className="font-semibold text-blue-700">
             교제 {getCategoryRankText(data.ranks.교제)}
           </div>
-          <div className="text-gray-400">|</div>
-          <div className="text-lg font-semibold text-red-700">
+          <div className="text-gray-400 hidden sm:inline">|</div>
+          <div className="font-semibold text-red-700">
             전도 {getCategoryRankText(data.ranks.전도)}
           </div>
         </div>
-        <div className="mt-4 flex items-center space-x-2">
-          <Sparkles className="h-5 w-5 text-yellow-500" />
-          <span className="text-gray-600">
-            총 포인트: <span className="font-bold text-blue-600">{data.user.totalPoints.toLocaleString()}P</span>
-          </span>
-          <span className="text-gray-400">•</span>
+        <div className="mt-3 sm:mt-4 flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm">
+          <div className="flex items-center space-x-1 sm:space-x-2">
+            <Sparkles className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-500" />
+            <span className="text-gray-600">
+              총 포인트: <span className="font-bold text-blue-600">{data.user.totalPoints.toLocaleString()}P</span>
+            </span>
+          </div>
+          <span className="text-gray-400 hidden sm:inline">•</span>
           <span className="text-gray-600">
             완료한 미션: <span className="font-bold">{data.totalCount}개</span>
           </span>
         </div>
       </div>
 
-      {/* 미션 기록 테이블 */}
+      {/* 미션 기록 - 모바일: 카드 형태, 데스크탑: 테이블 */}
       <div className="bg-white rounded-xl shadow-md overflow-hidden">
-        <div className="overflow-x-auto">
+        {/* 데스크탑 테이블 (md 이상) */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full">
             <thead className="bg-green-600 text-white">
               <tr>
@@ -256,7 +259,7 @@ export default function MyPage() {
                   </td>
                 </tr>
               ) : (
-                logsWithNumber.map((log, index) => {
+                logsWithNumber.map((log) => {
                   const categoryColor = getCategoryColor(log.mission.category);
                   const IconComponent = getIcon(log.mission.icon);
 
@@ -299,6 +302,56 @@ export default function MyPage() {
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* 모바일 카드 형태 (md 미만) */}
+        <div className="md:hidden divide-y divide-gray-200">
+          {logsWithNumber.length === 0 ? (
+            <div className="px-4 py-8 text-center text-gray-500 text-sm">
+              아직 완료한 미션이 없습니다.
+            </div>
+          ) : (
+            logsWithNumber.map((log) => {
+              const categoryColor = getCategoryColor(log.mission.category);
+              const IconComponent = getIcon(log.mission.icon);
+
+              return (
+                <div key={log.id} className="p-3 hover:bg-gray-50 transition-colors">
+                  <div className="flex items-start gap-3">
+                    {/* 왼쪽 아이콘 영역 */}
+                    <div className={`p-2 rounded-lg ${categoryColor.bg} ${categoryColor.text} flex-shrink-0`}>
+                      <IconComponent className="h-5 w-5" />
+                    </div>
+                    
+                    {/* 중앙 컨텐츠 영역 */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-xs text-gray-500 font-medium">{log.number}</span>
+                      </div>
+                      <div className="text-sm font-medium text-gray-900 leading-tight">
+                        {log.mission.title}
+                      </div>
+                    </div>
+                    
+                    {/* 오른쪽 점수 및 날짜 영역 */}
+                    <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                      <span
+                        className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${categoryColor.bg} ${categoryColor.text} border ${categoryColor.border} mb-1`}
+                      >
+                        {log.mission.category}
+                      </span>
+                      <span className="text-sm font-bold text-blue-600 whitespace-nowrap">
+                        {log.mission.points}P
+                      </span>
+                      <span className="text-xs text-gray-500 whitespace-nowrap">
+                        {formatDate(log.date)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          )}
         </div>
       </div>
     </div>

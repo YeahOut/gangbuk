@@ -20,7 +20,9 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+// Vite proxy를 사용하므로 상대 경로 사용 (개발/프로덕션 모두 동작)
+// 프로덕션에서도 같은 서버에서 실행되므로 상대 경로가 적절함
+const API_URL = import.meta.env.VITE_API_URL || '';
 
 axios.defaults.baseURL = API_URL;
 

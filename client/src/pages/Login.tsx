@@ -37,13 +37,22 @@ export default function Login() {
       <div className="max-w-md w-full">
         <div className="bg-white rounded-2xl shadow-xl p-8">
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-full mb-4">
-              <Target className="h-8 w-8 text-white" />
+            <div className="flex justify-center mb-4">
+              <img 
+                src="/logo.png" 
+                alt="서울강북교회 청년회 로고" 
+                className="h-16 w-auto object-contain"
+                style={{ maxHeight: '64px' }}
+                onError={(e) => {
+                  // 로고 이미지가 없으면 숨김
+                  e.currentTarget.style.display = 'none';
+                }}
+              />
             </div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              교회 청년회 미션 포인트
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
+              서울강북교회 청년회
             </h1>
-            <p className="text-gray-600">
+            <p className="text-sm sm:text-base text-gray-600">
               {isLogin ? '로그인하여 미션을 시작하세요' : '새 계정을 만들어보세요'}
             </p>
           </div>

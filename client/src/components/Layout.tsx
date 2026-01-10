@@ -13,26 +13,29 @@ export default function Layout({ children }: LayoutProps) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100">
       <nav className="bg-white shadow-md">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-8">
-              <Link to="/missions" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
+          <div className="flex justify-between items-center h-14 sm:h-16 gap-2">
+            {/* 좌측: 로고 + 메뉴 */}
+            <div className="flex items-center gap-2 sm:gap-4 lg:gap-8 flex-1 min-w-0">
+              <Link to="/missions" className="flex items-center gap-1 sm:gap-2 hover:opacity-80 transition-opacity flex-shrink-0">
                 <img 
                   src="/logo.png" 
                   alt="서울강북교회 청년회 로고" 
-                  className="h-12 w-auto object-contain"
-                  style={{ maxHeight: '38px' }}
+                  className="h-8 sm:h-10 w-auto object-contain"
+                  style={{ maxHeight: '32px' }}
                   onError={(e) => {
                     // 로고 이미지가 없으면 숨김
                     e.currentTarget.style.display = 'none';
                   }}
                 />
-                <span className="text-xl font-bold text-blue-600">서울강북교회 청년회</span>
+                <span className="text-xs sm:text-sm lg:text-base font-bold text-blue-600 whitespace-nowrap hidden md:inline">
+                  서울강북교회 청년회
+                </span>
               </Link>
-              <div className="flex space-x-4">
+              <div className="flex gap-1 sm:gap-2 lg:gap-4">
                 <Link
                   to="/missions"
-                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                  className={`px-2 sm:px-3 py-1.5 sm:py-2 rounded-md text-xs sm:text-sm font-medium transition-colors whitespace-nowrap ${
                     location.pathname === '/missions'
                       ? 'bg-blue-100 text-blue-700'
                       : 'text-gray-700 hover:bg-blue-50'
@@ -42,7 +45,7 @@ export default function Layout({ children }: LayoutProps) {
                 </Link>
                 <Link
                   to="/ranking"
-                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                  className={`px-2 sm:px-3 py-1.5 sm:py-2 rounded-md text-xs sm:text-sm font-medium transition-colors whitespace-nowrap ${
                     location.pathname === '/ranking'
                       ? 'bg-blue-100 text-blue-700'
                       : 'text-gray-700 hover:bg-blue-50'
@@ -52,32 +55,39 @@ export default function Layout({ children }: LayoutProps) {
                 </Link>
                 <Link
                   to="/mypage"
-                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                  className={`px-2 sm:px-3 py-1.5 sm:py-2 rounded-md text-xs sm:text-sm font-medium transition-colors whitespace-nowrap ${
                     location.pathname === '/mypage'
                       ? 'bg-blue-100 text-blue-700'
                       : 'text-gray-700 hover:bg-blue-50'
                   }`}
                 >
-                  <div className="flex items-center space-x-1">
-                    <User className="h-4 w-4" />
-                    <span>마이페이지</span>
+                  <div className="flex items-center gap-1">
+                    <User className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                    <span className="hidden sm:inline">마이페이지</span>
+                    <span className="sm:hidden">마이</span>
                   </div>
                 </Link>
               </div>
             </div>
-            <div className="flex items-center space-x-4">
-              <div className="text-sm text-gray-700">
-                <span className="font-medium">{user?.nickname}</span>
-                <span className="ml-2 text-blue-600 font-semibold">
+            {/* 우측: 사용자 정보 + 로그아웃 */}
+            <div className="flex items-center gap-1 sm:gap-2 lg:gap-4 flex-shrink-0">
+              <div className="text-xs sm:text-sm text-gray-700 hidden sm:block">
+                <span className="font-medium truncate max-w-[80px] sm:max-w-none">{user?.nickname}</span>
+                <span className="ml-1 sm:ml-2 text-blue-600 font-semibold">
+                  {user?.totalPoints.toLocaleString()}P
+                </span>
+              </div>
+              <div className="text-xs text-gray-700 sm:hidden">
+                <span className="text-blue-600 font-semibold">
                   {user?.totalPoints.toLocaleString()}P
                 </span>
               </div>
               <button
                 onClick={logout}
-                className="p-2 text-gray-600 hover:text-red-600 transition-colors"
+                className="p-1.5 sm:p-2 text-gray-600 hover:text-red-600 transition-colors flex-shrink-0"
                 title="로그아웃"
               >
-                <LogOut className="h-5 w-5" />
+                <LogOut className="h-4 w-4 sm:h-5 sm:w-5" />
               </button>
             </div>
           </div>

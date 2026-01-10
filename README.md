@@ -1,4 +1,6 @@
-# 교회 청년회 미션 포인트 웹 서비스
+# gangbuk - 교회 청년회 미션 포인트 웹 서비스
+
+미션 사이트
 
 ## 기술 스택
 - **Frontend**: React (Vite), TypeScript, Tailwind CSS
@@ -47,3 +49,9 @@ DATABASE_URL="file:./prisma/dev.db"
 JWT_SECRET="your-secret-key-here"
 ```
 
+## 주요 기능
+- 사용자 인증 (JWT 기반)
+- 미션 시스템 (말씀, 기도, 교제, 전도 카테고리)
+- 랭킹 시스템 (전체, 부서별, 카테고리별)
+- 마이페이지 (날짜별 미션 기록, 순위 조회)
+- 24개 미션 seed 데이터

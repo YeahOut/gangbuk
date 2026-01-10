@@ -22,11 +22,12 @@ module.exports = {
       name: 'church-client',
       cwd: './client',
       script: 'npm',
-      args: 'run dev',
+      args: 'run dev -- --host',
       interpreter: 'none',
       env: {
         NODE_ENV: 'production',
         PORT: 3000,
+        HOST: '0.0.0.0',
       },
       error_file: './logs/client-error.log',
       out_file: './logs/client-out.log',

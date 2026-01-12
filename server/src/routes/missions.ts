@@ -12,9 +12,21 @@ router.get('/', authenticate, async (req: AuthRequest, res) => {
       orderBy: { id: 'asc' },
     });
 
-    // 사용자가 완료한 미션 ID 목록 가져오기
+    // 오늘 날짜 계산 (UTC 기준)
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
+
+    // 오늘 완료한 미션 ID 목록 가져오기
     const completedMissions = await prisma.missionLog.findMany({
-      where: { userId: req.userId },
+      where: {
+        userId: req.userId,
+        completedAt: {
+          gte: today,
+          lt: tomorrow,
+        },
+      },
       select: { missionId: true },
     });
 
@@ -22,7 +34,7 @@ router.get('/', authenticate, async (req: AuthRequest, res) => {
       completedMissions.map((log) => log.missionId)
     );
 
-    // 각 미션에 완료 여부 추가
+    // 각 미션에 완료 여부 추가 (오늘 날짜 기준)
     const missionsWithStatus = missions.map((mission) => ({
       ...mission,
       completed: completedMissionIds.has(mission.id),
@@ -54,18 +66,28 @@ router.post('/:missionId/toggle', authenticate, async (req: AuthRequest, res) =>
       return res.status(404).json({ error: '미션을 찾을 수 없습니다.' });
     }
 
-    // 이미 완료했는지 확인
+    // 오늘 날짜 계산 (UTC 기준)
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
+
+    // 오늘 이미 완료했는지 확인 (날짜별 체크)
     const existingLog = await prisma.missionLog.findFirst({
       where: {
         userId: req.userId,
         missionId: missionIdNum,
+        completedAt: {
+          gte: today,
+          lt: tomorrow,
+        },
       },
     });
 
     // 트랜잭션으로 미션 로그 생성/삭제 및 포인트 업데이트
     const result = await prisma.$transaction(async (tx) => {
       if (existingLog) {
-        // 취소: 미션 로그 삭제 및 포인트 차감
+        // 취소: 오늘 완료한 미션 로그 삭제 및 포인트 차감
         await tx.missionLog.delete({
           where: { id: existingLog.id },
         });

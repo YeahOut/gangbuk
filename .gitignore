@@ -9,3 +9,10 @@ server/prisma/dev.db-journal
 *.db
 *.db-journal
 
+# SSH Keys (보안상 중요!)
+*.pem
+*.key
+*_rsa
+*_dsa
+*_ed25519
+

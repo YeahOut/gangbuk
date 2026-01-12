@@ -139,31 +139,55 @@ export default function MyPage() {
     return <div>데이터가 없습니다.</div>;
   }
 
-  // 모든 미션 로그를 날짜순(오래된 것부터)으로 정렬하여 하나의 배열로 합치기
-  const allLogs = data.missionLogs
-    .sort((a, b) => a.date.localeCompare(b.date)) // 오래된 날짜가 먼저
-    .flatMap((dateGroup) =>
-      dateGroup.logs
-        .sort((a, b) => new Date(a.completedAt).getTime() - new Date(b.completedAt).getTime()) // 시간순 정렬 (오래된 것부터)
-        .map((log) => ({
-          ...log,
-          date: dateGroup.date,
-        }))
-    );
+  // 날짜별로 정렬 (최신순)
+  const sortedLogsByDate = [...data.missionLogs].sort((a, b) => 
+    b.date.localeCompare(a.date)
+  );
 
-  // 카테고리별로 번호 할당 (날짜순으로)
-  const categoryCounts: Record<string, number> = {};
-  const logsWithNumber = allLogs.map((log) => {
-    const category = log.mission.category;
-    if (!categoryCounts[category]) {
-      categoryCounts[category] = 0;
-    }
-    categoryCounts[category]++;
+  // 각 날짜별로 카테고리별 번호 할당
+  const logsByDateWithNumbers = sortedLogsByDate.map((dateGroup) => {
+    const categoryCounts: Record<string, number> = {};
+    const logsWithNumber = dateGroup.logs
+      .sort((a, b) => new Date(a.completedAt).getTime() - new Date(b.completedAt).getTime())
+      .map((log) => {
+        const category = log.mission.category;
+        if (!categoryCounts[category]) {
+          categoryCounts[category] = 0;
+        }
+        categoryCounts[category]++;
+        return {
+          ...log,
+          number: categoryCounts[category],
+        };
+      });
+    
     return {
-      ...log,
-      number: categoryCounts[category],
+      date: dateGroup.date,
+      logs: logsWithNumber,
     };
   });
+
+  // 한국어 날짜 포맷
+  const formatDateHeader = (dateString: string) => {
+    const date = new Date(dateString);
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
+    const dateOnly = new Date(date);
+    dateOnly.setUTCHours(0, 0, 0, 0);
+    
+    const diffTime = today.getTime() - dateOnly.getTime();
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    const weekdays = ['일', '월', '화', '수', '목', '금', '토'];
+    const weekday = weekdays[date.getDay()];
+    
+    if (diffDays === 0) return `오늘 (${year}.${month}.${day} ${weekday})`;
+    if (diffDays === 1) return `어제 (${year}.${month}.${day} ${weekday})`;
+    return `${year}.${month}.${day} (${weekday})`;
+  };
 
   return (
     <div>
@@ -218,145 +242,142 @@ export default function MyPage() {
         </div>
       </div>
 
-      {/* 미션 기록 - 모바일: 카드 형태, 데스크탑: 테이블 */}
-      <div className="bg-white rounded-xl shadow-md overflow-hidden">
-        {/* 데스크탑 테이블 (md 이상) */}
-        <div className="hidden md:block overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-green-600 text-white">
-              <tr>
-                <th className="px-4 py-3 text-left text-sm font-medium uppercase tracking-wider">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-3 h-3 rounded-full bg-white"></div>
-                    <span>종류</span>
-                  </div>
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-medium uppercase tracking-wider">
-                  <div className="flex items-center space-x-2">
-                    <span className="text-lg">T</span>
-                    <span>번호</span>
-                  </div>
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-medium uppercase tracking-wider">
-                  미션 내용
-                </th>
-                <th className="px-4 py-3 text-center text-sm font-medium uppercase tracking-wider">
-                  점수
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-medium uppercase tracking-wider">
-                  <div className="flex items-center space-x-2">
-                    <Calendar className="h-4 w-4" />
-                    <span>날짜 (자동 입력)</span>
-                  </div>
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {logsWithNumber.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="px-4 py-8 text-center text-gray-500">
-                    아직 완료한 미션이 없습니다.
-                  </td>
-                </tr>
-              ) : (
-                logsWithNumber.map((log) => {
-                  const categoryColor = getCategoryColor(log.mission.category);
-                  const IconComponent = getIcon(log.mission.icon);
-
-                  return (
-                    <tr key={log.id} className="hover:bg-gray-50 transition-colors">
-                      <td className="px-4 py-3 whitespace-nowrap">
-                        <span
-                          className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${categoryColor.bg} ${categoryColor.text} border ${categoryColor.border}`}
-                        >
-                          {log.mission.category}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">{log.number}</div>
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center space-x-2">
-                          <div className={`p-2 rounded-lg ${categoryColor.bg} ${categoryColor.text}`}>
-                            <IconComponent className="h-4 w-4" />
-                          </div>
-                          <div>
-                            <div className="text-sm font-medium text-gray-900">
-                              {log.mission.title}
-                            </div>
-                            <div className="text-xs text-gray-500">{log.mission.description}</div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 whitespace-nowrap text-center">
-                        <span className="text-sm font-bold text-blue-600">
-                          {log.mission.points}P
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 whitespace-nowrap">
-                        <div className="text-sm text-gray-600">{formatDate(log.date)}</div>
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
+      {/* 미션 기록 - 날짜별 섹션 */}
+      {logsByDateWithNumbers.length === 0 ? (
+        <div className="bg-white rounded-xl shadow-md p-8 text-center text-gray-500">
+          아직 완료한 미션이 없습니다.
         </div>
-
-        {/* 모바일 카드 형태 (md 미만) */}
-        <div className="md:hidden divide-y divide-gray-200">
-          {logsWithNumber.length === 0 ? (
-            <div className="px-4 py-8 text-center text-gray-500 text-sm">
-              아직 완료한 미션이 없습니다.
-            </div>
-          ) : (
-            logsWithNumber.map((log) => {
-              const categoryColor = getCategoryColor(log.mission.category);
-              const IconComponent = getIcon(log.mission.icon);
-
-              return (
-                <div key={log.id} className="p-3 hover:bg-gray-50 transition-colors">
-                  <div className="flex items-start gap-3">
-                    {/* 왼쪽 아이콘 영역 */}
-                    <div className={`p-2 rounded-lg ${categoryColor.bg} ${categoryColor.text} flex-shrink-0`}>
-                      <IconComponent className="h-5 w-5" />
+      ) : (
+        <div className="space-y-6">
+          {logsByDateWithNumbers.map((dateGroup) => {
+            const datePoints = dateGroup.logs.reduce((sum, log) => sum + log.mission.points, 0);
+            
+            return (
+              <div key={dateGroup.date} className="bg-white rounded-xl shadow-md overflow-hidden">
+                {/* 날짜 헤더 */}
+                <div className="bg-gradient-to-r from-blue-500 to-blue-600 px-4 py-3 sm:px-6 sm:py-4">
+                  <div className="flex items-center justify-between flex-wrap gap-2">
+                    <div className="flex items-center space-x-2 sm:space-x-3">
+                      <Calendar className="h-5 w-5 sm:h-6 sm:w-6 text-white flex-shrink-0" />
+                      <h2 className="text-lg sm:text-xl font-bold text-white whitespace-nowrap">
+                        {formatDateHeader(dateGroup.date)}
+                      </h2>
                     </div>
-                    
-                    {/* 중앙 컨텐츠 영역 */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-xs text-gray-500 font-medium">{log.number}</span>
-                      </div>
-                      <div className="text-sm font-medium text-gray-900 leading-tight mb-0.5">
-                        {log.mission.title}
-                      </div>
-                      <div className="text-xs text-gray-500 truncate">
-                        {log.mission.description}
-                      </div>
-                    </div>
-                    
-                    {/* 오른쪽 점수 및 날짜 영역 */}
-                    <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                      <span
-                        className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${categoryColor.bg} ${categoryColor.text} border ${categoryColor.border} mb-1`}
-                      >
-                        {log.mission.category}
-                      </span>
-                      <span className="text-sm font-bold text-blue-600 whitespace-nowrap">
-                        {log.mission.points}P
-                      </span>
-                      <span className="text-xs text-gray-500 whitespace-nowrap">
-                        {formatDate(log.date)}
-                      </span>
+                    <div className="text-sm sm:text-base font-semibold text-blue-100 whitespace-nowrap">
+                      {dateGroup.logs.length}개 미션 • {datePoints}P
                     </div>
                   </div>
                 </div>
-              );
-            })
-          )}
+
+                {/* 데스크탑 테이블 (md 이상) */}
+                <div className="hidden md:block overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                          종류
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                          번호
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                          미션 내용
+                        </th>
+                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-700 uppercase tracking-wider">
+                          점수
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {dateGroup.logs.map((log) => {
+                        const categoryColor = getCategoryColor(log.mission.category);
+                        const IconComponent = getIcon(log.mission.icon);
+
+                        return (
+                          <tr key={log.id} className="hover:bg-gray-50 transition-colors">
+                            <td className="px-4 py-3 whitespace-nowrap">
+                              <span
+                                className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${categoryColor.bg} ${categoryColor.text} border ${categoryColor.border}`}
+                              >
+                                {log.mission.category}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3 whitespace-nowrap">
+                              <div className="text-sm font-medium text-gray-900">{log.number}</div>
+                            </td>
+                            <td className="px-4 py-3">
+                              <div className="flex items-center space-x-2">
+                                <div className={`p-2 rounded-lg ${categoryColor.bg} ${categoryColor.text}`}>
+                                  <IconComponent className="h-4 w-4" />
+                                </div>
+                                <div>
+                                  <div className="text-sm font-medium text-gray-900">
+                                    {log.mission.title}
+                                  </div>
+                                  <div className="text-xs text-gray-500">{log.mission.description}</div>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-4 py-3 whitespace-nowrap text-center">
+                              <span className="text-sm font-bold text-blue-600">
+                                {log.mission.points}P
+                              </span>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* 모바일 카드 형태 (md 미만) */}
+                <div className="md:hidden divide-y divide-gray-200">
+                  {dateGroup.logs.map((log) => {
+                    const categoryColor = getCategoryColor(log.mission.category);
+                    const IconComponent = getIcon(log.mission.icon);
+
+                    return (
+                      <div key={log.id} className="p-3 hover:bg-gray-50 transition-colors">
+                        <div className="flex items-start gap-3">
+                          {/* 왼쪽 아이콘 영역 */}
+                          <div className={`p-2 rounded-lg ${categoryColor.bg} ${categoryColor.text} flex-shrink-0`}>
+                            <IconComponent className="h-5 w-5" />
+                          </div>
+                          
+                          {/* 중앙 컨텐츠 영역 */}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="text-xs text-gray-500 font-medium">{log.number}</span>
+                            </div>
+                            <div className="text-sm font-medium text-gray-900 leading-tight mb-0.5">
+                              {log.mission.title}
+                            </div>
+                            <div className="text-xs text-gray-500 truncate">
+                              {log.mission.description}
+                            </div>
+                          </div>
+                          
+                          {/* 오른쪽 점수 영역 */}
+                          <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                            <span
+                              className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${categoryColor.bg} ${categoryColor.text} border ${categoryColor.border} mb-1`}
+                            >
+                              {log.mission.category}
+                            </span>
+                            <span className="text-sm font-bold text-blue-600 whitespace-nowrap">
+                              {log.mission.points}P
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
         </div>
-      </div>
+      )}
     </div>
   );
 }
